@@ -114,13 +114,29 @@
         
         .turtle {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 65px;
+            height: 65px;
             background-image: url('turtle.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             cursor: pointer;
+            animation: turtleAlive 3s ease-in-out infinite;
+        }
+        
+        @keyframes turtleAlive {
+            0%, 100% { 
+                transform: scale(1) translateX(0) translateY(0) rotate(0deg);
+            }
+            25% { 
+                transform: scale(1.05) translateX(-2px) translateY(-1px) rotate(-1deg);
+            }
+            50% { 
+                transform: scale(0.95) translateX(1px) translateY(1px) rotate(1deg);
+            }
+            75% { 
+                transform: scale(1.02) translateX(-1px) translateY(-2px) rotate(-0.5deg);
+            }
         }
         
         .ui {
@@ -376,9 +392,9 @@
         
         function createTurtles() {
             const positions = [
-                {x: 20, y: 40},
-                {x: 60, y: 65},
-                {x: 30, y: 80}
+                {x: 15, y: 40},
+                {x: 65, y: 65},
+                {x: 35, y: 80}
             ];
             
             positions.forEach((pos, index) => {
@@ -387,6 +403,14 @@
                 turtle.style.left = pos.x + '%';
                 turtle.style.top = pos.y + '%';
                 turtle.dataset.id = index;
+                
+                // 隨機方向 (水平翻轉)
+                if (Math.random() > 0.5) {
+                    turtle.style.transform += ' scaleX(-1)';
+                }
+                
+                // 隨機動畫延遲，讓每隻烏龜的動作不同步
+                turtle.style.animationDelay = Math.random() * 3 + 's';
                 
                 // 添加緩慢游動動畫
                 animateTurtle(turtle);
@@ -454,7 +478,8 @@
         }
         
         function extendHook() {
-            const maxHeight = window.innerHeight * 0.8;
+            // 計算最大伸展高度 - 螢幕高度的85%，避免超出螢幕
+            const maxHeight = window.innerHeight * 0.85;
             let currentHeight = 0;
             const speed = 5;
             
@@ -469,7 +494,7 @@
                     return;
                 }
                 
-                // 到達底部
+                // 到達最大高度
                 if (currentHeight >= maxHeight) {
                     clearInterval(extend);
                     retractHook();
