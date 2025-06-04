@@ -452,10 +452,10 @@
                 
                 game.hookAngle += game.hookDirection * 1.2;
                 
-                // 限制擺動角度，避免超出螢幕
-                if (game.hookAngle >= 35) {
+                // 更大的擺動角度
+                if (game.hookAngle >= 60) {
                     game.hookDirection = -1;
-                } else if (game.hookAngle <= -35) {
+                } else if (game.hookAngle <= -60) {
                     game.hookDirection = 1;
                 }
                 
@@ -482,7 +482,27 @@
         }
         
         function extendHook() {
-            const maxHeight = Math.min(window.innerHeight * 0.82, 600);
+            // 計算當前角度下的最大安全延伸距離
+            const hookStartX = window.innerWidth / 2; // 鉤子起始X位置
+            const angleRad = (game.hookAngle * Math.PI) / 180; // 轉換為弧度
+            const screenMargin = 50; // 離螢幕邊緣的安全距離
+            
+            // 計算左右邊界限制
+            const leftLimit = (hookStartX - screenMargin) / Math.abs(Math.sin(angleRad));
+            const rightLimit = (window.innerWidth - hookStartX - screenMargin) / Math.abs(Math.sin(angleRad));
+            
+            // 選擇較小的限制值，如果角度很小則使用螢幕高度
+            let maxHeight;
+            if (Math.abs(game.hookAngle) < 5) {
+                maxHeight = window.innerHeight * 0.82;
+            } else {
+                const sideLimit = Math.min(leftLimit, rightLimit);
+                maxHeight = Math.min(sideLimit, window.innerHeight * 0.82);
+            }
+            
+            // 確保最小延伸距離
+            maxHeight = Math.max(maxHeight, 200);
+            
             let currentHeight = 0;
             const speed = 6;
             
@@ -497,7 +517,7 @@
                     return;
                 }
                 
-                // 達到最大深度
+                // 達到計算出的最大深度
                 if (currentHeight >= maxHeight) {
                     clearInterval(extendInterval);
                     retractHook();
