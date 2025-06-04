@@ -404,11 +404,6 @@
                 turtle.style.top = pos.y + '%';
                 turtle.dataset.id = index;
                 
-                // 隨機方向 (水平翻轉)
-                if (Math.random() > 0.5) {
-                    turtle.style.transform += ' scaleX(-1)';
-                }
-                
                 // 隨機動畫延遲，讓每隻烏龜的動作不同步
                 turtle.style.animationDelay = Math.random() * 3 + 's';
                 
@@ -421,7 +416,7 @@
         }
         
         function animateTurtle(turtle) {
-            const moveDistance = 30;
+            const moveDistance = 25;
             const duration = 4000 + Math.random() * 2000;
             
             function move() {
@@ -429,7 +424,16 @@
                 
                 const currentLeft = parseFloat(turtle.style.left);
                 const direction = Math.random() > 0.5 ? 1 : -1;
-                const newLeft = Math.max(5, Math.min(85, currentLeft + direction * (Math.random() * moveDistance)));
+                const newLeft = Math.max(5, Math.min(80, currentLeft + direction * (Math.random() * moveDistance)));
+                
+                // 根據移動方向設定烏龜朝向
+                if (newLeft > currentLeft) {
+                    // 往右游 - 正常方向
+                    turtle.style.transform = turtle.style.transform.replace(/scaleX\([^)]*\)/, '') + ' scaleX(1)';
+                } else {
+                    // 往左游 - 翻轉
+                    turtle.style.transform = turtle.style.transform.replace(/scaleX\([^)]*\)/, '') + ' scaleX(-1)';
+                }
                 
                 turtle.style.transition = `left ${duration}ms ease-in-out`;
                 turtle.style.left = newLeft + '%';
