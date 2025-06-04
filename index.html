@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食蛇龜救援大作戰</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 50%, #191970 100%);
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, #87CEEB 0%, #4682B4 30%, #2F4F4F 70%, #191970 100%);
+        }
+        
+        .water-surface {
+            position: absolute;
+            top: 15%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #87CEEB, #4682B4, #87CEEB);
+            animation: wave 2s ease-in-out infinite;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.5); }
+        }
+        
+        .hook-system {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+        }
+        
+        .hook-base {
+            width: 60px;
+            height: 40px;
+            background: #8B4513;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            border: 3px solid #654321;
+        }
+        
+        .hook-line {
+            position: absolute;
+            left: 50%;
+            top: 40px;
+            transform: translateX(-50%);
+            width: 4px;
+            background: linear-gradient(to bottom, #666, #333);
+            transform-origin: top center;
+            transition: height 0.1s linear;
+            height: 0px;
+            box-shadow: 1px 0 2px rgba(0,0,0,0.3);
+        }
+        
+        .bucket {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 30px;
+            background: linear-gradient(to bottom, #DEB887, #CD853F);
+            border: 3px solid #8B4513;
+            border-radius: 5px 5px 20px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .bucket::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -4px;
+            right: -4px;
+            height: 12px;
+            background: linear-gradient(to bottom, #F4A460, #DEB887);
+            border: 2px solid #8B4513;
+            border-radius: 8px;
+        }
+        
+        .bucket::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background: rgba(135, 206, 235, 0.3);
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .turtle {
+            position: absolute;
+            width: 50px;
+            height: 40px;
+            background: #228B22;
+            border-radius: 50% 50% 40% 40%;
+            border: 2px solid #006400;
+            cursor: pointer;
+        }
+        
+        .turtle::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 15px;
+            width: 20px;
+            height: 15px;
+            background: #32CD32;
+            border-radius: 50%;
+            border: 1px solid #006400;
+        }
+        
+        .turtle::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            background: 
+                radial-gradient(circle at 30% 30%, #006400 3px, transparent 3px),
+                radial-gradient(circle at 70% 30%, #006400 3px, transparent 3px),
+                radial-gradient(circle at 50% 60%, #006400 4px, transparent 4px);
+            border-radius: 50%;
+        }
+        
+        .ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .instructions {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            font-size: 16px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 80%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #2F4F4F;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            background: #4682B4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #2F4F4F;
+        }
+        
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4682B4, #2F4F4F);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 999;
+        }
+        
+        .game-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .game-subtitle {
+            font-size: 16px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: float 3s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="start-screen" id="startScreen">
+            <div class="game-title">🐢 食蛇龜救援大作戰</div>
+            <div class="game-subtitle">
+                糟糕！三隻食蛇龜不小心掉到水裡了！<br>
+                食蛇龜是陸生動物，不會游泳，快來救救牠們吧！<br>
+                點擊螢幕放下救援桶，在60秒內救起所有烏龜！
+            </div>
+            <button class="btn" onclick="event.stopPropagation(); startGame()">開始救援</button>
+        </div>
+        
+        <div class="water-surface"></div>
+        <div class="bubbles" id="bubbles"></div>
+        
+        <div class="hook-system" id="hookSystem">
+            <div class="hook-base"></div>
+            <div class="hook-line" id="hookLine">
+                <div class="bucket" id="bucket"></div>
+            </div>
+        </div>
+        
+        <div class="ui">
+            <div>救援: <span id="rescued">0</span>/3</div>
+            <div>時間: <span id="timer">60</span>s</div>
+        </div>
+        
+        <div class="instructions" id="instructions">
+            點擊螢幕放下救援桶
+        </div>
+    </div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <button class="btn" onclick="event.stopPropagation(); restartGame()">重新開始</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            isPlaying: false,
+            rescued: 0,
+            timeLeft: 60,
+            hookMoving: true,
+            hookExtending: false,
+            hookPosition: 0,
+            hookDirection: 1,
+            turtles: [],
+            gameTimer: null,
+            hookTimer: null
+        };
+        
+        const hookSystem = document.getElementById('hookSystem');
+        const hookLine = document.getElementById('hookLine');
+        const bucket = document.getElementById('bucket');
+        const gameContainer = document.querySelector('.game-container');
+        
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            resetGame();
+            gameState.isPlaying = true;
+            
+            // 創建氣泡效果
+            createBubbles();
+            
+            // 創建烏龜
+            createTurtles();
+            
+            // 開始鉤子移動
+            startHookMovement();
+            
+            // 開始計時
+            startTimer();
+            
+            // 延遲添加點擊事件，避免按鈕點擊冒泡
+            setTimeout(() => {
+                document.addEventListener('click', handleClick);
+            }, 100);
+        }
+        
+        function resetGame() {
+            gameState.rescued = 0;
+            gameState.timeLeft = 60;
+            gameState.hookExtending = false;
+            gameState.hookPosition = 0;
+            gameState.hookDirection = 1;
+            gameState.turtles = [];
+            
+            document.getElementById('rescued').textContent = '0';
+            document.getElementById('timer').textContent = '60';
+            
+            // 清除現有烏龜
+            document.querySelectorAll('.turtle').forEach(turtle => turtle.remove());
+            
+            // 重置鉤子 - 確保初始狀態正確
+            hookLine.style.height = '0px';
+            hookLine.style.transform = 'translateX(-50%) rotate(0deg)';
+        }
+        
+        function createBubbles() {
+            const bubblesContainer = document.getElementById('bubbles');
+            bubblesContainer.innerHTML = '';
+            
+            for (let i = 0; i < 8; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = (20 + Math.random() * 60) + '%';
+                bubble.style.width = bubble.style.height = (10 + Math.random() * 20) + 'px';
+                bubble.style.animationDelay = Math.random() * 3 + 's';
+                bubblesContainer.appendChild(bubble);
+            }
+        }
+        
+        function createTurtles() {
+            const positions = [
+                {x: 20, y: 40},
+                {x: 60, y: 65},
+                {x: 30, y: 80}
+            ];
+            
+            positions.forEach((pos, index) => {
+                const turtle = document.createElement('div');
+                turtle.className = 'turtle';
+                turtle.style.left = pos.x + '%';
+                turtle.style.top = pos.y + '%';
+                turtle.dataset.id = index;
+                
+                // 添加緩慢游動動畫
+                animateTurtle(turtle);
+                
+                gameContainer.appendChild(turtle);
+                gameState.turtles.push(turtle);
+            });
+        }
+        
+        function animateTurtle(turtle) {
+            const moveDistance = 30;
+            const duration = 4000 + Math.random() * 2000;
+            
+            function move() {
+                if (!gameState.isPlaying) return;
+                
+                const currentLeft = parseFloat(turtle.style.left);
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                const newLeft = Math.max(5, Math.min(85, currentLeft + direction * (Math.random() * moveDistance)));
+                
+                turtle.style.transition = `left ${duration}ms ease-in-out`;
+                turtle.style.left = newLeft + '%';
+                
+                setTimeout(move, duration);
+            }
+            
+            move();
+        }
+        
+        function startHookMovement() {
+            gameState.hookTimer = setInterval(() => {
+                if (!gameState.hookMoving || gameState.hookExtending) return;
+                
+                gameState.hookPosition += gameState.hookDirection * 1.5;
+                
+                if (gameState.hookPosition >= 45) {
+                    gameState.hookDirection = -1;
+                } else if (gameState.hookPosition <= -45) {
+                    gameState.hookDirection = 1;
+                }
+                
+                // 鉤子線條旋轉角度
+                hookLine.style.transform = `translateX(-50%) rotate(${gameState.hookPosition}deg)`;
+            }, 50);
+        }
+        
+        function startTimer() {
+            gameState.gameTimer = setInterval(() => {
+                gameState.timeLeft--;
+                document.getElementById('timer').textContent = gameState.timeLeft;
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame(false);
+                }
+            }, 1000);
+        }
+        
+        function handleClick(e) {
+            if (!gameState.isPlaying || gameState.hookExtending) return;
+            
+            gameState.hookExtending = true;
+            gameState.hookMoving = false;
+            
+            extendHook();
+        }
+        
+        function extendHook() {
+            const maxHeight = window.innerHeight * 0.8;
+            let currentHeight = 0;
+            const speed = 5;
+            
+            const extend = setInterval(() => {
+                currentHeight += speed;
+                hookLine.style.height = currentHeight + 'px';
+                
+                // 檢查碰撞
+                if (checkCollision()) {
+                    clearInterval(extend);
+                    retractHook();
+                    return;
+                }
+                
+                // 到達底部
+                if (currentHeight >= maxHeight) {
+                    clearInterval(extend);
+                    retractHook();
+                }
+            }, 20);
+        }
+        
+        function checkCollision() {
+            const bucketRect = bucket.getBoundingClientRect();
+            
+            for (let turtle of gameState.turtles) {
+                if (turtle.style.display === 'none') continue;
+                
+                const turtleRect = turtle.getBoundingClientRect();
+                
+                if (bucketRect.left < turtleRect.right &&
+                    bucketRect.right > turtleRect.left &&
+                    bucketRect.top < turtleRect.bottom &&
+                    bucketRect.bottom > turtleRect.top) {
+                    
+                    // 救到烏龜
+                    turtle.style.display = 'none';
+                    gameState.rescued++;
+                    document.getElementById('rescued').textContent = gameState.rescued;
+                    
+                    // 檢查勝利條件
+                    if (gameState.rescued >= 3) {
+                        setTimeout(() => endGame(true), 500);
+                    }
+                    
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function retractHook() {
+            const currentHeight = parseFloat(hookLine.style.height);
+            const speed = 8;
+            
+            const retract = setInterval(() => {
+                const newHeight = parseFloat(hookLine.style.height) - speed;
+                
+                if (newHeight <= 0) {
+                    hookLine.style.height = '0px';
+                    clearInterval(retract);
+                    gameState.hookExtending = false;
+                    gameState.hookMoving = true;
+                } else {
+                    hookLine.style.height = newHeight + 'px';
+                }
+            }, 20);
+        }
+        
+        function endGame(won) {
+            gameState.isPlaying = false;
+            clearInterval(gameState.gameTimer);
+            clearInterval(gameState.hookTimer);
+            
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const message = document.getElementById('modalMessage');
+            
+            if (won) {
+                title.textContent = '🎉 救援成功！';
+                message.textContent = '太棒了！你成功救起了所有的食蛇龜！牠們現在安全回到陸地上了。感謝你的努力，你是真正的動物保育英雄！';
+            } else {
+                title.textContent = '⏰ 時間到了！';
+                message.textContent = `救援時間結束了！你成功救起了 ${gameState.rescued} 隻食蛇龜。雖然沒有全部救完，但每一隻被救的烏龜都很感謝你！要再試一次嗎？`;
+            }
+            
+            modal.classList.add('show');
+        }
+        
+        function restartGame() {
+            document.getElementById('modal').classList.remove('show');
+            document.getElementById('startScreen').style.display = 'flex';
+            document.removeEventListener('click', handleClick);
+        }
+        
+        // 防止頁面滾動
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // 防止雙擊縮放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
