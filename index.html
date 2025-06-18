@@ -458,8 +458,8 @@
     <!-- 失敗時的模態框 -->
     <div class="modal" id="failModal">
         <div class="modal-content">
-            <h2 id="modalTitle">⏰ 時間到了！</h2>
-            <p id="modalMessage"></p>
+            <h2>⏰ 時間到了！</h2>
+            <p id="failMessage"></p>
             <button class="btn" onclick="event.stopPropagation(); restartGame()">重新開始</button>
         </div>
     </div>
@@ -769,7 +769,7 @@
                 elements.successModal.classList.add('show');
             } else {
                 // 顯示失敗模態框
-                const message = document.getElementById('modalMessage');
+                const message = document.getElementById('failMessage');
                 message.textContent = `救援時間結束了！你成功救起了 ${game.rescued} 隻食蛇龜。雖然沒有全部救完，但每一隻被救的烏龜都很感謝你！要再試一次嗎？`;
                 elements.failModal.classList.add('show');
             }
