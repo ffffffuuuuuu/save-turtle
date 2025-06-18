@@ -205,6 +205,136 @@
             font-size: 16px;
         }
         
+        /* 科普視窗樣式 */
+        .secrets-modal {
+            background: white;
+            border-radius: 25px;
+            padding: 25px 20px 20px 20px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 90vh;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .secrets-modal::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .turtle-icon {
+            width: 60px;
+            height: 60px;
+            background-image: url('turtle.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0 auto 15px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .title {
+            color: #2F4F4F;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .button-area {
+            flex-shrink: 0;
+        }
+        
+        .secret-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid #4682B4;
+            text-align: left;
+        }
+        
+        .secret-card:last-of-type {
+            margin-bottom: 0;
+        }
+        
+        .secret-title {
+            color: #2F4F4F;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        
+        .secret-text {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+        }
+        
+        .heart {
+            position: absolute;
+            color: #ff69b4;
+            font-size: 12px;
+            animation: float-heart 3s infinite ease-in-out;
+            opacity: 0;
+        }
+        
+        @keyframes float-heart {
+            0% { 
+                opacity: 0;
+                transform: translateY(100px) scale(0);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(80px) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-40px) scale(0);
+            }
+        }
+        
         .btn {
             background: linear-gradient(135deg, #4682B4, #2F4F4F);
             color: white;
@@ -220,6 +350,24 @@
         }
         
         .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .close-btn {
+            background: linear-gradient(135deg, #4682B4, #2F4F4F);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .close-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
@@ -307,11 +455,49 @@
         </div>
     </div>
     
-    <div class="modal" id="modal">
+    <!-- 失敗時的模態框 -->
+    <div class="modal" id="failModal">
         <div class="modal-content">
-            <h2 id="modalTitle"></h2>
+            <h2 id="modalTitle">⏰ 時間到了！</h2>
             <p id="modalMessage"></p>
             <button class="btn" onclick="event.stopPropagation(); restartGame()">重新開始</button>
+        </div>
+    </div>
+
+    <!-- 成功時的科普視窗 -->
+    <div class="modal" id="successModal">
+        <div class="secrets-modal">
+            <div class="hearts" id="hearts"></div>
+            
+            <div class="turtle-icon"></div>
+            <div class="title">謝謝你救了我們！<br>作為回報，我們要告訴你三個小秘密...</div>
+            
+            <div class="content-area">
+                <div class="secret-card">
+                    <div class="secret-title">🍃 其實我不挑食啦...</div>
+                    <div class="secret-text">
+                        雖然叫食蛇龜，但我從不吃蛇呢！我什麼都吃～果子、花花、小蝸牛、蚯蚓...只要塞得進嘴巴的都OK！
+                    </div>
+                </div>
+                
+                <div class="secret-card">
+                    <div class="secret-title">💎 我們很珍貴的...</div>
+                    <div class="secret-text">
+                        全世界的我們越來越少了...被人類抓去當藥材或寵物，現在是一級保育類動物呢！請保護我們好嗎？
+                    </div>
+                </div>
+                
+                <div class="secret-card">
+                    <div class="secret-title">🏠 我的特殊技能！</div>
+                    <div class="secret-text">
+                        遇到危險時，我會把頭和腳縮進殼裡，腹甲還能關起來變成密閉的小房子！台灣只有我會這招喔～
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-area">
+                <button class="close-btn" onclick="event.stopPropagation(); restartGame()">知道了，我會保護你們的！ 💚</button>
+            </div>
         </div>
     </div>
 
@@ -336,7 +522,8 @@
             container: document.querySelector('.game-container'),
             rescued: document.getElementById('rescued'),
             timer: document.getElementById('timer'),
-            modal: document.getElementById('modal'),
+            failModal: document.getElementById('failModal'),
+            successModal: document.getElementById('successModal'),
             startScreen: document.getElementById('startScreen')
         };
         
@@ -576,22 +763,35 @@
                 if (timer) clearInterval(timer);
             });
             
-            const title = document.getElementById('modalTitle');
-            const message = document.getElementById('modalMessage');
-            
             if (won) {
-                title.textContent = '🎉 救援成功！';
-                message.textContent = '太棒了！你成功救起了所有的食蛇龜！牠們現在安全回到陸地上了。感謝你的努力，你是真正的動物保育英雄！';
+                // 顯示科普視窗並創建愛心特效
+                createHearts();
+                elements.successModal.classList.add('show');
             } else {
-                title.textContent = '⏰ 時間到了！';
+                // 顯示失敗模態框
+                const message = document.getElementById('modalMessage');
                 message.textContent = `救援時間結束了！你成功救起了 ${game.rescued} 隻食蛇龜。雖然沒有全部救完，但每一隻被救的烏龜都很感謝你！要再試一次嗎？`;
+                elements.failModal.classList.add('show');
             }
+        }
+        
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            heartsContainer.innerHTML = '';
             
-            elements.modal.classList.add('show');
+            for (let i = 0; i < 8; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '💕';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 3 + 's';
+                heartsContainer.appendChild(heart);
+            }
         }
         
         function restartGame() {
-            elements.modal.classList.remove('show');
+            elements.failModal.classList.remove('show');
+            elements.successModal.classList.remove('show');
             elements.startScreen.style.display = 'flex';
             document.removeEventListener('click', dropHook);
         }
